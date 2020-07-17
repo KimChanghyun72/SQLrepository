@@ -137,3 +137,69 @@ FROM emp;
 SELECT * FROM emp;
 SELECT empno, ename, comm, mgr, deptno, COALESCE(comm, mgr, deptno)
 FROM emp;
+
+SELECT mgr FROM emp
+WHERE empno = 7839;
+
+SELECT mgr FROM emp
+WHERE empno=1234;
+--null
+SELECT NVL(mgr, 999) FROM emp
+WHERE empno=7839;
+--공집합 -> 
+SELECT NVL(mgr, 999) FROM emp
+WHERE empno=1234;
+
+SELECT AVG(NVL(comm,0)), AVG(comm)
+FROM emp;
+
+SELECT MAX(mgr) FROM emp
+WHERE empno=7839;
+
+SELECT NVL(max(mgr),999) FROM emp
+WHERE empno=7839;
+
+SELECT NVL(max(mgr),999) FROM emp
+WHERE empno=1234;
+
+SELECT NVL(max(mgr),999) FROM emp
+WHERE empno=1234;
+
+SELECT avg(sal), SUM(sal) FROM emp;
+
+SELECT MAX(ename), MIN(hiredate), COUNT(deptno)
+FROM emp;
+
+SELECT COUNT(*), COUNT(deptno), COUNT(DISTINCT deptno)
+FROM emp
+WHERE sal > 1500;
+--group by절에 온 col은 결과 설명을 위해 select에 사용가능. 다른 col은 사용불가능.
+SELECT deptno, COUNT(*), SUM(sal)
+FROM emp
+WHERE sal>1200
+GROUP BY deptno;
+--group함수가 들어가있는 구문은 where절에 들어갈 수 없음.
+SELECT deptno, count(*), SUM(sal)
+FROM EMP
+WHERE SUM(sal)>12000
+GROUP BY deptno;
+
+SELECT deptno, count(*), SUM(sal)
+FROM EMP
+GROUP BY deptno
+HAVING SUM(sal) > 10000;
+
+SELECT deptno, job, count(*), SUM(sal)
+FROM emp
+GROUP BY deptno, job
+ORDER BY 1,2;
+
+SELECT MGR
+FROM EMP WHERE ENAME = 'SCOTT';
+
+SELECT NVL(MGR, 9999) AS MGR
+FROM EMP
+WHERE ENAME = 'KING';
+
+SELECT ENAME, EMPNO, MGR, NULLIF(MGR, 7698) AS NUIF
+FROM EMP;
