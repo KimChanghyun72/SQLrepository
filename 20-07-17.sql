@@ -312,3 +312,49 @@ FROM emp;
 SELECT deptno, ename, sal, SUM(sal) OVER (PARTITION BY deptno ORDER BY sal 
                                           RANGE UNBOUNDED PRECEDING)deptno_sum
 FROM emp;
+
+
+SELECT B.DNAME, A.JOB, COUNT(*) AS EMP_CNT, SUM (A.SAL) AS SAL_SUM
+FROM EMP A, DEPT B
+WHERE B.DEPTNO = A.DEPTNO
+GROUP BY B.DNAME, A.JOB
+ORDER BY B.DNAME, A.JOB;
+
+SELECT deptno, ename, sal,
+LAST_VALUE(ename) OVER (PARTITION BY deptno ORDER BY sal DESC
+rows BETWEEN CURRENT ROW AND unbounded FOLLOWING) as dept_rich
+from emp;
+
+SELECT deptno, ename, sal, 
+  FIRST_VALUE(ename) OVER(PARTITION BY deptno ORDER BY sal DESC, ename
+          ROWS UNBOUNDED PRECEDING) AS dept_rich
+FROM emp;
+
+SELECT ename, hiredate, sal, LAG(sal) OVER(ORDER BY hiredate) AS prev_sal
+FROM emp
+WHERE job = 'SALESMAN';
+
+SELECT ename, hiredate, sal, LEAD(sal) OVER(ORDER BY hiredate)AS prev_sal
+FROM emp 
+WHERE job = 'SALESMAN';
+
+SELECT ename, sal, ROUND(RATIO_TO_REPORT(sal) OVER (),2)AS p_r
+FROM emp;
+
+SELECT deptno, ename, sal, 
+PERCENT_RANK() OVER(PARTITION BY deptno ORDER BY sal DESC) AS P_R
+FROM emp;
+
+SELECT deptno, ename, sal, 
+(PERCENT_RANK() OVER(ORDER BY sal))*100 as p_r
+FROM emp;
+
+SELECT deptno, ename, sal,
+CUME_DIST()OVER(PARTITION BY deptno ORDER BY sal) as c_dist
+FROM emp;
+
+SELECT ename, sal, NTILE(4) OVER (ORDER BY sal DESC)AS q_tile
+FROM emp;
+
+SELECT ename, sal, NTILE(4) OVER()AS q_tile
+FROM emp;
