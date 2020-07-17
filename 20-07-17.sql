@@ -203,3 +203,112 @@ WHERE ENAME = 'KING';
 
 SELECT ENAME, EMPNO, MGR, NULLIF(MGR, 7698) AS NUIF
 FROM EMP;
+
+SELECT deptno, job, count(*), SUM(sal)
+FROM emp
+GROUP BY deptno, job
+ORDER BY 1,2;
+
+SELECT deptno, job, count(*), SUM(sal)
+FROM emp
+GROUP BY ROLLUP(deptno, job);
+
+SELECT deptno, job, count(*), SUM(sal)
+FROM emp
+GROUP BY ROLLUP(deptno, job)
+ORDER BY 1,2;
+
+SELECT deptno, job, count(*), SUM(sal)
+FROM emp
+GROUP BY deptno, job
+UNION
+SELECT deptno, TO_CHAR(null), count(*), SUM(sal)
+FROM emp
+GROUP BY deptno
+UNION
+SELECT TO_NUMBER(null), TO_CHAR(null), count(*), SUM(sal)
+FROM emp
+ORDER BY 1,2;
+
+SELECT deptno, job, count(*), SUM(sal)
+FROM emp
+GROUP BY CUBE(deptno, job)
+ORDER BY 1,2;
+
+SELECT deptno, job, count(*), SUM(sal)
+FROM emp
+GROUP BY grouping sets((deptno, job),())
+ORDER BY 1,2;
+
+insert into emp(empno, ename, deptno)
+VALUES (8000,'JAMES',30);
+commit;
+select * from emp;
+
+SELECT deptno, job, count(*), SUM(sal)
+FROM emp
+GROUP BY CUBE(deptno, job)
+ORDER BY 1,2;
+
+SELECT deptno, job, count(*), SUM(sal),GROUPING(deptno),GROUPING(job)
+FROM emp
+GROUP BY CUBE(deptno, job)
+ORDER BY 1,2;
+
+SELECT empno, sal, AVG(sal)
+FROM emp
+GROUP BY empno,sal;
+--RANK -> 공동2등 있으면 3등 없음.
+SELECT ename, sal, RANK() OVER(ORDER BY sal DESC) AS sal_rank
+FROM emp
+WHERE sal IS NOT NULL;
+--DENSE_RANK -> 공동2등 있어도 다음순위를 3등으로 선정.
+SELECT ename, sal,DENSE_RANK() OVER(ORDER BY sal DESC) AS sal_rank
+FROM emp
+WHERE sal IS NOT NULL;
+--윈도우함수 사용시에 over함수가 필수적으로 따라오는데 여기에 옵션을 여러가지 넣을 수 있다.
+SELECT ename, sal, RANK() OVER(PARTITION BY job ORDER BY sal DESC) AS sal_rank
+FROM emp
+WHERE sal IS NOT NULL;
+--ROW_NUMBER->동률을 없애버림.
+SELECT ename, sal, ROW_NUMBER() OVER(ORDER BY sal DESC, ename DESC) AS sal_rank
+FROM emp
+WHERE sal IS NOT NULL;
+
+SELECT mgr, ename, sal, SUM(sal) OVER (PARTITION BY mgr)mgr_sum
+FROM emp;
+--dept:20의 두 행의 값이 같으니까 같은걸로 인식해서 아래행에서 한꺼번에 합산.
+SELECT deptno, ename, sal, SUM(sal) OVER (PARTITION BY deptno ORDER BY sal 
+                                          RANGE UNBOUNDED PRECEDING)deptno_sum
+FROM emp;
+
+select deptno, ename, sal, MAX(sal) OVER(PARTITION BY deptno) AS MAX_SAL
+FROM emp;
+
+SELECT deptno, ename, sal
+FROM (SELECT deptno, ename, sal, RANK()OVER(PARTITION BY deptno ORDER BY sal DESC) AS SAL_RK FROM emp)
+WHERE sal= SAL_RK;
+
+SELECT deptno, ename, sal
+FROM (SELECT deptno, ename, sal, MAX(sal) OVER (PARTITION BY deptno) as mgr_max
+      FROM emp)
+WHERE sal = mgr_max;      
+
+SELECT deptno, ename, hiredate, sal, MIN(sal) OVER(PARTITION BY deptno ORDER BY hiredate)
+FROM emp;
+
+SELECT deptno, ename, hiredate, sal, MIN(sal) OVER(ORDER BY ename)
+FROM emp;
+
+SELECT deptno, ename, hiredate, sal, MIN(sal) OVER()
+FROM emp;
+--ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING->위아래 1칸씩과 비교하겠다.->P.325
+SELECT deptno, ename, hiredate, sal, ROUND(AVG(sal) OVER(PARTITION BY deptno ORDER BY hiredate 
+                                              ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING)) AS dept_sum
+FROM emp;                                              
+
+SELECT ename, sal, COUNT(*) OVER(ORDER BY sal RANGE BETWEEN UNBOUNDED PRECEDING AND 150 FOLLOWING)as sum_cnt
+FROM emp;
+SELECT deptno, ename, sal, SUM(sal) OVER (PARTITION BY deptno ORDER BY sal 
+                                          RANGE UNBOUNDED PRECEDING)deptno_sum
+FROM emp;
